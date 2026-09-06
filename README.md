@@ -20,6 +20,11 @@ Based on [LR2oraja](https://github.com/wcko87/lr2oraja), which is itself a fork 
 * Compatible with beatoraja 0.8.8 installs
 * Built in Mod Menu, accessible using **`F5` or `Insert`**
 
+### Fork Features (`birowsi`)
+* **Auto-Screenshot on Clear**: Automatically takes a screenshot on the Result screen 1.5 seconds after clearing any song (`FAILED`/`NO PLAY` excluded), working reliably across multiple consecutive plays.
+* **Top-Left Toast Notifications**: Anchors in-game toast notifications (`ImGuiNotify`) strictly to the top-left (`Top-Left`) using `ImGuiCond.Always`.
+* **Konmai Downloader Fix**: Configures JSON deserialization to ignore unknown fields, fixing song downloads via the Konmai API.
+
 ## Downloads
 Development builds are created for every commit and published as [releases](https://github.com/seraxis/lr2oraja-endlessdream/releases)
 
