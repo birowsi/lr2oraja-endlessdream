@@ -31,7 +31,7 @@ public class ImGuiNotify {
         "TopLeft", "TopCenter", "TopRight", "BottomLeft", "BottomCenter", "BottomRight", "Center"
     };
 
-    private static ToastPos DEFAULT_TOAST_POS = ToastPos.TopLeft;
+    private static ToastPos DEFAULT_TOAST_POS = ToastPos.TopRight;
 
     public enum ToastType {
         None,
