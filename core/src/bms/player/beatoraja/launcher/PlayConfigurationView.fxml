@@ -35,7 +35,7 @@
     <HBox fx:id="topBar">
         <Hyperlink fx:id="newversion" alignment="CENTER_LEFT" text="" />
         <Region minWidth="10.0" HBox.hgrow="ALWAYS" />
-        <Hyperlink fx:id="changelog" onAction="#whatsNewPopup" alignment="CENTER_RIGHT" text="What's new in this version" />
+        <Hyperlink fx:id="changelog" onAction="#whatsNewPopup" alignment="CENTER_RIGHT" text="by hanbi" />
     </HBox>
     <HBox fx:id="playerPanel" alignment="CENTER_LEFT" prefHeight="10.0" prefWidth="730.0">
         <VBox.margin>
