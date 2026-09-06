@@ -33,6 +33,7 @@ import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.ir.*;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.TargetProperty;
+import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
@@ -116,6 +117,7 @@ public class MainController {
 	private SystemSoundManager sound;
 
 	private Thread screenshot;
+	private MainState autoScreenshotState;
 
 	private MusicDownloadProcessor download;
 	private HttpDownloadProcessor httpDownloadProcessor;
@@ -798,6 +800,33 @@ public class MainController {
                     screenshot.start();
                     this.saveLastRecording("ON_SCREENSHOT");
                 }
+            }
+
+            // auto screenshot on clear
+            if (this.current instanceof AbstractResult) {
+                if (this.autoScreenshotState != this.current) {
+                    AbstractResult res = (AbstractResult) this.current;
+                    ScoreData score = res.getNewScore();
+                    if (score != null) {
+                        int clear = score.getClear();
+                        if (clear <= 1) { // 0: NO PLAY, 1: FAILED -> do not screenshot
+                            this.autoScreenshotState = this.current;
+                        } else if ((res.timer.getNowTime() >= 1500L || res.timer.isTimerOn(2)) && (this.screenshot == null || !this.screenshot.isAlive())) {
+                            this.autoScreenshotState = this.current;
+                            final byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(), true);
+                            this.screenshot = new Thread(() -> {
+                                for (int i = 3; i < pixels.length; i += 4) {
+                                    pixels[i] = (byte) 0xff;
+                                }
+                                new ScreenShotFileExporter().send(this.current, pixels);
+                            });
+                            this.screenshot.start();
+                            this.saveLastRecording("ON_SCREENSHOT");
+                        }
+                    }
+                }
+            } else {
+                this.autoScreenshotState = null;
             }
 
             if (input.isActivated(KeyCommand.POST_TWITTER)) {
