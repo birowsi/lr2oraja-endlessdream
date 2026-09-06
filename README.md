@@ -6,6 +6,13 @@
 
 </div>
 
+## 🌟 Fork Features (`birowsi`)
+* **Auto-Screenshot on Clear**: Automatically takes a screenshot on the Result screen 1.5 seconds after clearing any song (`FAILED`/`NO PLAY` excluded), working reliably across multiple consecutive plays.
+* **Top-Left Toast Notifications**: Anchors in-game toast notifications (`ImGuiNotify`) strictly to the top-left (`Top-Left`) using `ImGuiCond.Always`.
+* **Konmai Downloader Fix**: Configures JSON deserialization to ignore unknown fields, fixing song downloads via the Konmai API.
+
+---
+
 Endless Dream is a community fork and drop-in replacement for [beatoraja](https://github.com/exch-bms2/beatoraja) that integrates quality of life patches and new features not present in the upstream version of the game.
 
 Based on [LR2oraja](https://github.com/wcko87/lr2oraja), which is itself a fork with LR2 judges and gauges, Endless Dream aims to fix some of the outstanding issues with the upstream project while being a central place for modifications and extensions that may never be accepted by upstream.
@@ -19,11 +26,6 @@ Based on [LR2oraja](https://github.com/wcko87/lr2oraja), which is itself a fork 
 * Faster Table Processing
 * Compatible with beatoraja 0.8.8 installs
 * Built in Mod Menu, accessible using **`F5` or `Insert`**
-
-### Fork Features (`birowsi`)
-* **Auto-Screenshot on Clear**: Automatically takes a screenshot on the Result screen 1.5 seconds after clearing any song (`FAILED`/`NO PLAY` excluded), working reliably across multiple consecutive plays.
-* **Top-Left Toast Notifications**: Anchors in-game toast notifications (`ImGuiNotify`) strictly to the top-left (`Top-Left`) using `ImGuiCond.Always`.
-* **Konmai Downloader Fix**: Configures JSON deserialization to ignore unknown fields, fixing song downloads via the Konmai API.
 
 ## Downloads
 Development builds are created for every commit and published as [releases](https://github.com/seraxis/lr2oraja-endlessdream/releases)
