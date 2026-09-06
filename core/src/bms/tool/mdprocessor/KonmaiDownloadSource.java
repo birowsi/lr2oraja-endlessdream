@@ -21,6 +21,7 @@ public class KonmaiDownloadSource implements HttpDownloadSource {
     private final ObjectMapper om = new ObjectMapper();
 
     public KonmaiDownloadSource(Config config) {
+        this.om.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         // override download url if user ask to do so
         String overrideDownloadURL = config.getOverrideDownloadURL();
         this.downloadQueryURL = overrideDownloadURL != null && !overrideDownloadURL.isEmpty()
