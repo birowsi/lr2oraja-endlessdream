@@ -1,6 +1,7 @@
 package bms.player.beatoraja.modmenu;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import javafx.util.Pair;
 
@@ -267,7 +268,7 @@ public class ImGuiNotify {
             ImGui.setNextWindowPos(
                     toastPos.getKey(),
                     toastPos.getValue(),
-                    ImGuiWindowFlags.None,
+                    ImGuiCond.Always,
                     currentToast.pos.pivotX,
                     currentToast.pos.pivotY
             );
