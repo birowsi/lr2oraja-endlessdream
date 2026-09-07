@@ -10,6 +10,7 @@
 * **Auto-Screenshot on Clear**: Automatically takes a screenshot on the Result screen 1.5 seconds after clearing any song (`FAILED`/`NO PLAY` excluded), working reliably across multiple consecutive plays.
 * **Top-Right Toast Notifications**: Anchors in-game toast notifications (`ImGuiNotify`) strictly to the top-right (`Top-Right`) using `ImGuiCond.Always`.
 * **Konmai Downloader Fix**: Configures JSON deserialization to ignore unknown fields, fixing song downloads via the Konmai API.
+* **Mocha IR Compatibility**: Restores `MochaIRConnection` with an official vanilla beatoraja 0.8.8 hash fallback, enabling seamless player authentication and score submission with Mocha IR on Endless Dream builds.
 * **Minor Fixes**:
   * Silences missing SLF4J provider console warnings on startup.
 
