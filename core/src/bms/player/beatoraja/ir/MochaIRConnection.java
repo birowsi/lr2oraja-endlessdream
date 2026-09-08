@@ -1013,7 +1013,6 @@ public final class MochaIRConnection implements IRConnection {
          "ff708502fa6498ad38e759dc7271f6599e9f381030d6805b803c9096625a2e8e"
       };
       SQLiteSongDatabaseAccessor var1 = (SQLiteSongDatabaseAccessor)MainLoader.getScoreDatabaseAccessor();
-      MainLoader.setVersionChecker(new bms.player.beatoraja.ir.MochaIRConnection.MochaVersionChecker());
       var1.addPlugin((var0x, var1x) -> {
          if ("Konami".equals(var0x.getValues().get("GROUP"))) {
             var1x.setContent(65536);
@@ -1163,76 +1162,6 @@ public final class MochaIRConnection implements IRConnection {
    static class LogInResponse extends bms.player.beatoraja.ir.MochaIRConnection.ChromaIRResponse<IRPlayerData> {
       String key;
       bms.player.beatoraja.ir.MochaIRConnection.Rival profile;
-   }
-
-   @JsonIgnoreProperties(
-      ignoreUnknown = true
-   )
-   static class MochaVersion {
-      public String[] test;
-      public String[] latest;
-      public String[] current;
-      public String[] obsolete;
-   }
-
-   private static class MochaVersionChecker implements VersionChecker {
-      private String dlurl;
-      private String message;
-
-      public String getMessage() {
-         if (this.message == null) {
-            this.getInformation();
-         }
-
-         return this.message;
-      }
-
-      public String getDownloadURL() {
-         if (this.message == null) {
-            this.getInformation();
-         }
-
-         return this.dlurl;
-      }
-
-      private void getInformation() {
-         try {
-            URL var1 = new URL("https://mocha-repository.info/beatoraja_version.json");
-            ObjectMapper var2 = new ObjectMapper();
-            bms.player.beatoraja.ir.MochaIRConnection.MochaVersion var3 = (bms.player.beatoraja.ir.MochaIRConnection.MochaVersion)var2.readValue(
-               var1, bms.player.beatoraja.ir.MochaIRConnection.MochaVersion.class
-            );
-
-            for (String var7 : var3.test) {
-               if (MainController.getVersion().equals(var7)) {
-                  this.message = "最新テストバージョンを利用中です";
-               }
-            }
-
-            for (String var18 : var3.latest) {
-               if (MainController.getVersion().equals(var18)) {
-                  this.message = String.format("最新バージョン[%s]を利用中です。", var18);
-               }
-            }
-
-            for (String var19 : var3.current) {
-               if (MainController.getVersion().equals(var19)) {
-                  this.message = String.format("最新バージョン[%s]を利用可能です。", var3.latest[0]);
-                  this.dlurl = "https://mocha-repository.info/download/" + var3.latest[0].replaceAll(" ", "") + ".zip";
-               }
-            }
-
-            for (String var20 : var3.obsolete) {
-               if (MainController.getVersion().equals(var20)) {
-                  this.message = String.format("Mocha-Repository接続不可のバージョンです。最新バージョン[%s]を利用可能です。", var3.latest[0]);
-                  this.dlurl = "https://mocha-repository.info/download/" + var3.latest[0].replaceAll(" ", "") + ".zip";
-               }
-            }
-         } catch (Exception var8) {
-            Logger.getGlobal().warning("最新版URL取得時例外:" + var8.getMessage());
-            this.message = "バージョン情報を取得できませんでした";
-         }
-      }
    }
 
    static final class PostPlay {
