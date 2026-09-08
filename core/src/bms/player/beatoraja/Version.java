@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 public class Version {
     private static Logger logger = LoggerFactory.getLogger(Version.class);
     public static final int VERSION_MAJOR = 0;
-    public static final int VERSION_MINOR = 3;
-    public static final int VERSION_PATCH = 2;
+    public static final int VERSION_MINOR = 4;
+    public static final int VERSION_PATCH = 0;
 
     public static final BuildType BUILD_TYPE;
     public static final String version;
@@ -26,7 +26,7 @@ public class Version {
     private static Properties buildMetaInfo = new Properties();
 
     static {
-        BUILD_TYPE = BuildType.PRERELEASE;
+        BUILD_TYPE = BuildType.STABLE;
         unqualifiedVersion = String.valueOf(VERSION_MAJOR) + '.' + VERSION_MINOR + '.' + VERSION_PATCH;
         version = BUILD_TYPE.prefix + unqualifiedVersion;
         versionLong = "LR2oraja Endless Dream " + (BUILD_TYPE.prefix.isBlank() ? "" : "pre-release ") + unqualifiedVersion;
