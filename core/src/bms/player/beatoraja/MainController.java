@@ -814,8 +814,8 @@ public class MainController {
                         } else {
                             long now = res.timer.getNowTime();
                             boolean isFadeout = res.timer.isTimerOn(SkinProperty.TIMER_FADEOUT);
-                            boolean isIrPending = res.getState() == AbstractResult.STATE_IR_PROCESSING && now < 6000L;
-                            boolean timeReached = now >= 3500L && !isIrPending;
+                            boolean isIrPending = res.getState() == AbstractResult.STATE_IR_PROCESSING && now < 4500L;
+                            boolean timeReached = now >= 2000L && !isIrPending;
 
                             if ((timeReached || isFadeout) && (this.screenshot == null || !this.screenshot.isAlive())) {
                                 this.autoScreenshotState = this.current;
