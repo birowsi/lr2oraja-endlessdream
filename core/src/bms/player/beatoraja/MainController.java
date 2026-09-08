@@ -811,17 +811,24 @@ public class MainController {
                         int clear = score.getClear();
                         if (clear <= 1) { // 0: NO PLAY, 1: FAILED -> do not screenshot
                             this.autoScreenshotState = this.current;
-                        } else if ((res.timer.getNowTime() >= 1500L || res.timer.isTimerOn(2)) && (this.screenshot == null || !this.screenshot.isAlive())) {
-                            this.autoScreenshotState = this.current;
-                            final byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(), true);
-                            this.screenshot = new Thread(() -> {
-                                for (int i = 3; i < pixels.length; i += 4) {
-                                    pixels[i] = (byte) 0xff;
-                                }
-                                new ScreenShotFileExporter().send(this.current, pixels);
-                            });
-                            this.screenshot.start();
-                            this.saveLastRecording("ON_SCREENSHOT");
+                        } else {
+                            long now = res.timer.getNowTime();
+                            boolean isFadeout = res.timer.isTimerOn(SkinProperty.TIMER_FADEOUT);
+                            boolean isIrPending = res.getState() == AbstractResult.STATE_IR_PROCESSING && now < 6000L;
+                            boolean timeReached = now >= 3500L && !isIrPending;
+
+                            if ((timeReached || isFadeout) && (this.screenshot == null || !this.screenshot.isAlive())) {
+                                this.autoScreenshotState = this.current;
+                                final byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(), true);
+                                this.screenshot = new Thread(() -> {
+                                    for (int i = 3; i < pixels.length; i += 4) {
+                                        pixels[i] = (byte) 0xff;
+                                    }
+                                    new ScreenShotFileExporter().send(this.current, pixels);
+                                });
+                                this.screenshot.start();
+                                this.saveLastRecording("ON_SCREENSHOT");
+                            }
                         }
                     }
                 }

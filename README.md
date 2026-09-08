@@ -7,11 +7,12 @@
 </div>
 
 ## 🌟 Fork Features (`birowsi`)
-* **Auto-Screenshot on Clear**: Automatically takes a screenshot on the Result screen 1.5 seconds after clearing any song (`FAILED`/`NO PLAY` excluded), working reliably across multiple consecutive plays.
+* **Auto-Screenshot on Clear**: Automatically takes a screenshot on the Result screen after clearing any song (`FAILED`/`NO PLAY` excluded). Waits adaptively for IR ranking data to finish loading (up to 6.0s timeout, default duration 3.5s) or triggers immediately upon screen fadeout, ensuring online rankings are always captured.
 * **Top-Right Toast Notifications**: Anchors in-game toast notifications (`ImGuiNotify`) strictly to the top-right (`Top-Right`) using `ImGuiCond.Always`.
 * **Konmai Downloader Fix**: Configures JSON deserialization to ignore unknown fields, fixing song downloads via the Konmai API.
 * **Mocha IR Compatibility**: Restores `MochaIRConnection` with an official vanilla beatoraja 0.8.8 hash fallback, enabling seamless player authentication and score submission with Mocha IR on Endless Dream builds.
 * **Minor Fixes**:
+  * Fixes `ClassCastException` in `DifficultyTableParser` when score rate or miss rate are parsed as integers.
   * Silences missing SLF4J provider console warnings on startup.
 
 ---

@@ -41,7 +41,6 @@ import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 import bms.player.beatoraja.song.SongUtils;
-import org.slf4j.jul.JULServiceProvider;
 
 /**
  * 起動用クラス
