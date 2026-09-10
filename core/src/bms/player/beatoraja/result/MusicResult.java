@@ -82,6 +82,7 @@ public class MusicResult extends AbstractResult {
 		final IRStatus[] ir = main.getIRStatus();
 		if (ir.length > 0 && resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY && !resource.isFreqOn()) {
 			state = STATE_IR_PROCESSING;
+			List<IRSendStatus> scores = new ArrayList<IRSendStatus>();
 			
         	for(IRStatus irc : ir) {
     			boolean send = resource.isUpdateScore() && !resource.isForceNoIRSend();
@@ -99,26 +100,22 @@ public class MusicResult extends AbstractResult {
     			}
     			
     			if(send) {
-    				main.irSendStatus.add(new IRSendStatus(irc.connection, resource.getSongdata(), newscore));
+				IRSendStatus status = new IRSendStatus(irc.connection, resource.getSongdata(), newscore);
+				main.irSendStatus.add(status);
+				scores.add(status);
     			}
         	}
 			
 			Thread irprocess = new Thread(() -> {
 				int irsend = 0;
-				boolean succeed = true;
 				List<IRSendStatus> removeIrSendStatus = new ArrayList<IRSendStatus>();
-				List<IRSendStatus> scores = new ArrayList<IRSendStatus>();
-				if (!main.irSendStatus.isEmpty()) {
-					scores = main.irSendStatus.subList(main.irSendStatus.size() - ir.length, main.irSendStatus.size());
-				}
-
 				for (IRSendStatus irc : scores) {
 					try {
 						if (irsend == 0) {
 							timer.switchTimer(TIMER_IR_CONNECT_BEGIN, true);
 						}
 						irsend++;
-						succeed &= irc.send();
+						irc.send();
 						if (irc.retry < 0 || irc.retry > main.getConfig().getIrSendCount()) {
 							removeIrSendStatus.add(irc);
 						}
@@ -132,17 +129,19 @@ public class MusicResult extends AbstractResult {
 				main.irSendStatus.removeAll(removeIrSendStatus);
 
 				if(irsend > 0) {
-					timer.switchTimer(succeed ? TIMER_IR_CONNECT_SUCCESS : TIMER_IR_CONNECT_FAIL, true);
 					try {
 						IRResponse<bms.player.beatoraja.ir.IRScoreData[]> response = ir[0].connection.getPlayData(null, new IRChartData(resource.getSongdata()));
 						if(response.isSucceeded()) {
 							ranking.updateScore(response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);
 							rankingOffset = ranking.getRank() > 10 ? ranking.getRank() - 5 : 0;
+							timer.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
 							logger.info("IRからのスコア取得成功 : {}", response.getMessage());
 						} else {
+							timer.switchTimer(TIMER_IR_CONNECT_FAIL, true);
 							logger.warn("IRからのスコア取得失敗 : {}", response.getMessage());
 						}
 					} catch (Exception e) {
+						timer.switchTimer(TIMER_IR_CONNECT_FAIL, true);
 						logger.warn("IRからのスコア取得時例外: {}", e.getMessage());
 						e.printStackTrace();
 					}

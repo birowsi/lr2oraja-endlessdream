@@ -7,13 +7,16 @@
 </div>
 
 ## 🌟 Fork Features (`birowsi`)
-* **Auto-Screenshot on Clear**: Automatically captures and saves screenshots upon song clear (EX-HARD, HARD, CLEAR, EASY, ASSIST EASY). Features an adaptive 2.0s delay that waits for IR ranking results to finish loading (up to 4.5s) before capture, or triggers immediately on screen fadeout. Failed plays are ignored.
+* **Auto-Screenshot on Clear**: Automatically captures successful result screens after 2.0 seconds, waiting up to 4.5 seconds for IR ranking data when necessary. Failed plays are ignored.
+* **IR Result Reliability**: Keeps each result's uploads separate from the retry queue, prevents concurrent queue modification, and displays rankings when the primary IR lookup succeeds even if another provider fails.
+* **Runtime Logging**: Routes SLF4J messages to Java's console/file logger so IR login, upload, and ranking failures remain diagnosable.
 * **Top-Right Toast Notifications**: Anchors in-game toast notifications (`ImGuiNotify`) strictly to the top-right (`Top-Right`) using `ImGuiCond.Always`.
 * **Konmai Downloader Fix**: Configures JSON deserialization to ignore unknown fields, fixing song downloads via the Konmai API.
-* **Mocha IR Compatibility**: Restores `MochaIRConnection` with an official vanilla beatoraja 0.8.8 hash fallback, enabling seamless player authentication and score submission with Mocha IR on Endless Dream builds.
 * **Minor Fixes**:
   * Fixes `ClassCastException` in `DifficultyTableParser` when score rate or miss rate are parsed as integers.
-  * Silences missing SLF4J provider console warnings on startup.
+
+> [!NOTE]
+> IR providers are installed as separate plugin JARs. This fork does not bundle an IR implementation or spoof BMS-IR's client hash. BMS-IR may reject custom builds that are not on its server-side allowlist.
 
 ---
 
@@ -32,7 +35,7 @@ Based on [LR2oraja](https://github.com/wcko87/lr2oraja), which is itself a fork 
 * Built in Mod Menu, accessible using **`F5` or `Insert`**
 
 ## Downloads
-Development builds are created for every commit and published as [releases](https://github.com/seraxis/lr2oraja-endlessdream/releases)
+Official Endless Dream builds are published in the [upstream releases](https://github.com/seraxis/lr2oraja-endlessdream/releases). This fork's custom changes are built from this repository.
 
 > [!NOTE]
 > As of 0.3.0 the Java version has changed from 8 to 17, please check the releases page to update your installations java version
@@ -55,7 +58,7 @@ A JDK 17 **with javafx** is required to build and run. Consider using [liberica 
 
 Clone this repository with submodules
 ```sh
-git clone --recurse-submodules git@github.com:seraxis/lr2oraja-endlessdream.git
+git clone --recurse-submodules https://github.com/birowsi/lr2oraja-endlessdream.git
 ```
 Run the gradle wrapper for your operating system and specify your desired platform as a [gradle system property](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_system_properties)
 

@@ -137,7 +137,7 @@ public class MainController {
 
 	public ImGuiRenderer imGui;
 
-	public List<IRSendStatus> irSendStatus = new ArrayList<IRSendStatus>();
+	public List<IRSendStatus> irSendStatus = new java.util.concurrent.CopyOnWriteArrayList<IRSendStatus>();
 
 	public MainController(Path f, Config config, PlayerConfig player, BMSPlayerMode auto, boolean songUpdated) {
 		this.auto = auto;
@@ -225,20 +225,21 @@ public class MainController {
 				if(irconfig.getUserid().length() == 0 || irconfig.getPassword().length() == 0) {
 				} else {
 					try {
-						IRResponse<IRPlayerData> response = ir.login(new IRAccount(irconfig.getUserid(), irconfig.getPassword(), ""));
+						IRResponse<IRPlayerData> response;
+						try {
+							response = ir.login(new IRAccount(irconfig.getUserid(), irconfig.getPassword(), ""));
+						} catch (IllegalArgumentException e) {
+							logger.info("{}: trying pre-0.8.5 IR login method", irconfig.getIrname());
+							response = ir.login(irconfig.getUserid(), irconfig.getPassword());
+						}
 						if(response.isSucceeded()) {
 							irarray.add(new IRStatus(irconfig, ir, response.getData()));
+							logger.info("IR login succeeded: {}", irconfig.getIrname());
 						} else {
-							logger.warn("IRへのログイン失敗 : {}", response.getMessage());
+							logger.warn("IR login failed [{}]: {}", irconfig.getIrname(), response.getMessage());
 						}
-					} catch (IllegalArgumentException e) {
-						logger.info("trying pre-0.8.5 IR login method");
-						IRResponse<IRPlayerData> response = ir.login(irconfig.getUserid(), irconfig.getPassword());
-						if(response.isSucceeded()) {
-							irarray.add(new IRStatus(irconfig, ir, response.getData()));
-						} else {
-							logger.warn("IRへのログイン失敗 : {}", response.getMessage());
-						}
+					} catch (Throwable e) {
+						logger.warn("IR login failed [{}]", irconfig.getIrname(), e);
 					}
 				}
 			}
@@ -824,7 +825,7 @@ public class MainController {
                                     for (int i = 3; i < pixels.length; i += 4) {
                                         pixels[i] = (byte) 0xff;
                                     }
-                                    new ScreenShotFileExporter().send(this.current, pixels);
+                                    new ScreenShotFileExporter().send(res, pixels);
                                 });
                                 this.screenshot.start();
                                 this.saveLastRecording("ON_SCREENSHOT");

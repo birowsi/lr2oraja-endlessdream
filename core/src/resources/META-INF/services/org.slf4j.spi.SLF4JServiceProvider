@@ -1,1 +1,1 @@
-org.slf4j.helpers.NOP_FallbackServiceProvider
+org.slf4j.jul.JULServiceProvider
