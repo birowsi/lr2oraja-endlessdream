@@ -3,6 +3,8 @@ package bms.player.beatoraja;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+
+import bms.player.beatoraja.rivals.RivalDataAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +47,8 @@ import bms.player.beatoraja.song.*;
 import bms.player.beatoraja.stream.StreamController;
 import bms.tool.mdprocessor.MusicDownloadProcessor;
 
+import static bms.player.beatoraja.modmenu.ImGuiRenderer.getShowModMenu;
+
 /**
  * アプリケーションのルートクラス
  *
@@ -65,7 +69,6 @@ public class MainController {
 	private final Calendar cl = Calendar.getInstance();
 	private long mouseMovedTime;
 
-	private BMSPlayer bmsplayer;
 	private MusicDecide decide;
 	private MusicSelector selector;
 	private MusicResult result;
@@ -384,9 +387,6 @@ public class MainController {
 	}
 
 	private MainState createBMSPlayerState() {
-		if (bmsplayer != null) {
-			bmsplayer.dispose();
-		}
 		return new BMSPlayer(this, resource);
 	}
 
@@ -723,10 +723,14 @@ public class MainController {
 
             // マウスカーソル表示判定
             if(input.isMouseMoved()) {
-            	input.setMouseMoved(false);
-            	mouseMovedTime = time;
-			}
-			Gdx.input.setCursorCatched(current == bmsplayer && time > mouseMovedTime + 5000);
+                input.setMouseMoved(false);
+                mouseMovedTime = time;
+            }
+            if (!getShowModMenu() && current instanceof BMSPlayer) {
+                Gdx.input.setCursorCatched(time > mouseMovedTime + 2000);
+            } else {
+                Gdx.input.setCursorCatched(false);
+            }
 			// FPS表示切替
             if (input.isActivated(KeyCommand.SHOW_FPS)) {
                 showfps = !showfps;
@@ -869,9 +873,6 @@ public class MainController {
 	public void dispose() {
 		saveConfig();
 
-		if (bmsplayer != null) {
-			bmsplayer.dispose();
-		}
 		if (selector != null) {
 			selector.dispose();
 		}
@@ -1070,8 +1071,12 @@ public class MainController {
 	private UpdateThread updateSong;
 
 	public void updateSong(String path) {
+		updateSong(path, false);
+	}
+
+	public void updateSong(String path, boolean updateParentWhenMissing) {
 		if (updateSong == null || !updateSong.isAlive()) {
-			updateSong = new SongUpdateThread(path);
+			updateSong = new SongUpdateThread(path, updateParentWhenMissing);
 			updateSong.start();
 		} else {
 			logger.warn("楽曲更新中のため、更新要求は取り消されました");
@@ -1117,15 +1122,17 @@ public class MainController {
 	class SongUpdateThread extends UpdateThread {
 
 		private final String path;
+		private final boolean updateParentWhenMissing;
 
-		public SongUpdateThread(String path) {
-			super("updating folder : " + (path == null ? "ALL" : path));
+		public SongUpdateThread(String path, boolean updateParentWhenMissing) {
+			super("updating folder : " + (path == null ? "ALL" : path) + ", update parent when missing :" + (updateParentWhenMissing ? "yes" : "no"));
 			this.path = path;
+			this.updateParentWhenMissing = updateParentWhenMissing;
 		}
 
 		public void run() {
 			ImGuiNotify.info(this.message);
-			getSongDatabase().updateSongDatas(path, config.getBmsroot(), false, getInfoDatabase());
+			getSongDatabase().updateSongDatas(path, config.getBmsroot(), false, updateParentWhenMissing, getInfoDatabase());
 		}
 	}
 

@@ -161,7 +161,6 @@ public class ImGuiRenderer {
                 float axis;
 
                 ImGui.text("Commit hash: " + Version.getGitCommitHash());
-                ImGui.text("Build time: " + Version.getBuildDate());
                 ImGui.text("GLFW version: " + GLFW.glfwGetVersionString());
                 for (Controller con : manager.getControllers()) {
                     ImGui.text("Controller Name: " + con.getName());
@@ -193,6 +192,10 @@ public class ImGuiRenderer {
         imGuiGlfw.shutdown();
         imGuiGlfw = null;
         ImGui.destroyContext();
+    }
+
+    public static Boolean getShowModMenu() {
+        return SHOW_MOD_MENU.get();
     }
 
     public static void toggleMenu() {
