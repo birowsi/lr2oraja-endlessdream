@@ -4,6 +4,10 @@ plugins {
     `java-library`
 }
 
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
+}
+
 // use `-Dplatform=[platform]` or change this value to set the target platform for the jar
 // Available platforms:
 //    "windows", "linux", "macos"
