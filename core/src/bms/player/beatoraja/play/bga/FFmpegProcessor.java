@@ -59,6 +59,15 @@ public class FFmpegProcessor implements MovieProcessor {
 	}
 
 	public void create(String filepath) {
+		try {
+			// JavaCPP native extraction must finish before playback can interrupt the worker thread.
+			synchronized (FFmpegFrameGrabber.class) {
+				FFmpegFrameGrabber.tryLoad();
+			}
+		} catch (Exception e) {
+			logger.error("Failed to initialize FFmpeg for {}", filepath, e);
+			return;
+		}
 		movieseek = new MovieSeekThread(filepath);
 		movieseek.start();
 	}
@@ -252,8 +261,10 @@ public class FFmpegProcessor implements MovieProcessor {
 				e.printStackTrace();
 			} finally {
 				try {
-					grabber.stop();
-					grabber.close();
+					if (grabber != null) {
+						grabber.stop();
+						grabber.close();
+					}
 					logger.info("動画リソースの開放 : {}", filepath);
 				} catch (Throwable e) {
 					e.printStackTrace();
