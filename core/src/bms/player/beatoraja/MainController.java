@@ -536,7 +536,7 @@ public class MainController {
 								}
 								if(score.retry > getConfig().getIrSendCount()) {
 									removeIrSendStatus.add(score);
-									ImGuiNotify.error(String.format("Failed to send a score for %s %s", score.song.getTitle(), score.song.getSubtitle()));
+									ImGuiNotify.error(String.format("Failed to send a score for %s", score.getName()));
 								}
 							}
 							irSendStatus.removeAll(removeIrSendStatus);
@@ -1202,6 +1202,9 @@ public class MainController {
 	public static class IRSendStatus {
 		public final IRConnection ir;
 		public final SongData song;
+		// set instead of song for course scores
+		public final CourseData course;
+		public final int lnmode;
 		public final ScoreData score;
 		public int retry = 0;
 		public long lastTry = 0;
@@ -1209,16 +1212,32 @@ public class MainController {
 		public IRSendStatus(IRConnection ir, SongData song, ScoreData score) {
 			this.ir = ir;
 			this.song = song;
+			this.course = null;
+			this.lnmode = 0;
 			this.score = score;
 		}
 
+		public IRSendStatus(IRConnection ir, CourseData course, int lnmode, ScoreData score) {
+			this.ir = ir;
+			this.song = null;
+			this.course = course;
+			this.lnmode = lnmode;
+			this.score = score;
+		}
+
+		public String getName() {
+			return course != null ? course.getName() : song.getTitle() + " " + song.getSubtitle();
+		}
+
 		public boolean send() {
-			logger.info("IRへスコア送信中 : {}", song.getTitle());
+			logger.info("IRへスコア送信中 : {}", getName());
 			lastTry = System.currentTimeMillis();
-			IRResponse<Object> send1 = ir.sendPlayData(new IRChartData(song), new bms.player.beatoraja.ir.IRScoreData(score));
+			IRResponse<Object> send1 = course != null
+					? ir.sendCoursePlayData(new IRCourseData(course, lnmode), new bms.player.beatoraja.ir.IRScoreData(score))
+					: ir.sendPlayData(new IRChartData(song), new bms.player.beatoraja.ir.IRScoreData(score));
 			retry++;
 			if(send1.isSucceeded()) {
-				logger.info("IRスコア送信完了 : {}", song.getTitle());
+				logger.info("IRスコア送信完了 : {}", getName());
 				isSent = true;
 				return true;
 			} else {

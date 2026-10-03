@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.MainController.IRSendStatus;
 import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor.ControlKeys;
@@ -28,7 +29,6 @@ import bms.player.beatoraja.skin.property.EventFactory.EventType;
 public class CourseResult extends AbstractResult {
 	private static final Logger logger = LoggerFactory.getLogger(CourseResult.class);
 
-	private List<IRSendStatus> irSendStatus = new ArrayList<IRSendStatus>();
 
 	private ResultKeyProperty property;
 
@@ -93,6 +93,7 @@ public class CourseResult extends AbstractResult {
 				}
 			}
 			final int lnmode = uln ? config.getLnmode() : 0;
+			List<IRSendStatus> scores = new ArrayList<IRSendStatus>();
 			
         	for(IRStatus irc : ir) {
     			boolean send = resource.isUpdateCourseScore() && !resource.isForceNoIRSend() && resource.getCourseData().isRelease();
@@ -110,7 +111,10 @@ public class CourseResult extends AbstractResult {
     			}
     			
     			if(send) {
-    				irSendStatus.add(new IRSendStatus(irc.connection, resource.getCourseData(), lnmode, newscore));
+				IRSendStatus status = new IRSendStatus(irc.connection, resource.getCourseData(), lnmode, newscore);
+				// failed sends stay queued and are retried by MainController's resend thread
+				main.irSendStatus.add(status);
+				scores.add(status);
     			}
         	}
 
@@ -120,7 +124,7 @@ public class CourseResult extends AbstractResult {
 				boolean primarySent = true;
 				List<IRSendStatus> removeIrSendStatus = new ArrayList<>();
 
-				for (IRSendStatus irc : irSendStatus) {
+				for (IRSendStatus irc : scores) {
 					try {
 						if (irsend == 0) {
 							timer.switchTimer(TIMER_IR_CONNECT_BEGIN, true);
@@ -130,7 +134,7 @@ public class CourseResult extends AbstractResult {
 						if (irc.ir == ir[0].connection && !sent) {
 							primarySent = false;
 						}
-						if (irc.retry < 0 || irc.retry > main.getConfig().getIrSendCount()) {
+						if (irc.isSent || irc.retry > main.getConfig().getIrSendCount()) {
 							removeIrSendStatus.add(irc);
 						}
 					} catch (Exception e) {
@@ -143,7 +147,7 @@ public class CourseResult extends AbstractResult {
 						removeIrSendStatus.add(irc);
 					}
 				}
-				irSendStatus.removeAll(removeIrSendStatus);
+				main.irSendStatus.removeAll(removeIrSendStatus);
 
 				if (irsend > 0) {
 					try {
@@ -334,33 +338,4 @@ public class CourseResult extends AbstractResult {
 		return resource.getCourseScoreData();
 	}
 
-	static class IRSendStatus {
-		public final IRConnection ir;
-		public final CourseData course;
-		public final int lnmode;
-		public final ScoreData score;
-		public int retry = 0;
-		
-		public IRSendStatus(IRConnection ir, CourseData course, int lnmode, ScoreData score) {
-			this.ir = ir;
-			this.course = course;
-			this.lnmode = lnmode;
-			this.score = score;
-		}
-		
-		public boolean send() {
-			logger.info("IRへスコア送信中 : {}", course.getName());
-            IRResponse<Object> send1 = ir.sendCoursePlayData(new IRCourseData(course, lnmode), new bms.player.beatoraja.ir.IRScoreData(score));
-            if(send1.isSucceeded()) {
-				logger.info("IRスコア送信完了 : {}", course.getName());
-                retry = -255;
-                return true;
-            } else {
-				logger.warn("IRスコア送信失敗 : {}", send1.getMessage());
-                retry++;
-                return false;
-            }
-
-		}
-	}
 }

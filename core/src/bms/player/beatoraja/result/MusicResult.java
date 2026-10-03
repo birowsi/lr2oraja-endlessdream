@@ -121,7 +121,7 @@ public class MusicResult extends AbstractResult {
 						if (irc.ir == ir[0].connection && !sent) {
 							primarySent = false;
 						}
-						if (irc.retry < 0 || irc.retry > main.getConfig().getIrSendCount()) {
+						if (irc.isSent || irc.retry > main.getConfig().getIrSendCount()) {
 							removeIrSendStatus.add(irc);
 						}
 					} catch (Exception e) {
