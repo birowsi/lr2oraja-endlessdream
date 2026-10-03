@@ -240,12 +240,25 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			stop = true;
 			long l = System.currentTimeMillis();
 			while(mixer.isAlive() && System.currentTimeMillis() - l < 1000);
-			stream.stop();
-			stream.close();
-			
+			// PortAudio can time out while stopping on shutdown; keep releasing the rest anyway
+			try {
+				stream.stop();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+			try {
+				stream.close();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+
 			stream = null;
 
-			PortAudio.terminate();
+			try {
+				PortAudio.terminate();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
 //			System.out.println( "JPortAudio test complete." );			
 		}
 	}
