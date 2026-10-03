@@ -108,6 +108,8 @@ public class MusicResult extends AbstractResult {
 			
 			Thread irprocess = new Thread(() -> {
 				int irsend = 0;
+				// the ranking shown comes from ir[0], so its upload decides SUCCESS/FAIL
+				boolean primarySent = true;
 				List<IRSendStatus> removeIrSendStatus = new ArrayList<IRSendStatus>();
 				for (IRSendStatus irc : scores) {
 					try {
@@ -115,13 +117,19 @@ public class MusicResult extends AbstractResult {
 							timer.switchTimer(TIMER_IR_CONNECT_BEGIN, true);
 						}
 						irsend++;
-						irc.send();
+						boolean sent = irc.send();
+						if (irc.ir == ir[0].connection && !sent) {
+							primarySent = false;
+						}
 						if (irc.retry < 0 || irc.retry > main.getConfig().getIrSendCount()) {
 							removeIrSendStatus.add(irc);
 						}
 					} catch (Exception e) {
 						logger.warn("IR送信時の例外: {}", e.getMessage());
 						e.printStackTrace();
+						if (irc.ir == ir[0].connection) {
+							primarySent = false;
+						}
 						// remove from queue
 						removeIrSendStatus.add(irc);
 					}
@@ -137,7 +145,7 @@ public class MusicResult extends AbstractResult {
                             main.getRivalDataAccessor().updateAllRivalsScores(response.getData(), songData, lnMode);
 							ranking.updateScore(response.getData(), newscore.getExscore() > oldscore.getExscore() ? newscore : oldscore);
 							rankingOffset = ranking.getRank() > 10 ? ranking.getRank() - 5 : 0;
-							timer.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
+							timer.switchTimer(primarySent ? TIMER_IR_CONNECT_SUCCESS : TIMER_IR_CONNECT_FAIL, true);
 							logger.info("IRからのスコア取得成功 : {}", response.getMessage());
 						} else {
 							timer.switchTimer(TIMER_IR_CONNECT_FAIL, true);

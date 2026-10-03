@@ -819,11 +819,15 @@ public class MainController {
                             FloatArray gauge = res.resource.getGauge()[res.resource.getGrooveGauge().getType()];
                             cleared = gauge.size > 0 && gauge.get(gauge.size - 1) > 0;
                         }
-                        if (!cleared) {
+                        // autoplay / replay results are not worth keeping
+                        boolean isPlay = res.resource.getPlayMode().mode == BMSPlayerMode.Mode.PLAY;
+                        boolean isFadeout = res.timer.isTimerOn(SkinProperty.TIMER_FADEOUT);
+                        // past the first frames of the fadeout the capture would already be darkened
+                        boolean fadeoutTooLate = isFadeout && res.timer.getNowTime(SkinProperty.TIMER_FADEOUT) > 100L;
+                        if (!cleared || !isPlay || fadeoutTooLate) {
                             this.autoScreenshotState = this.current;
                         } else {
                             long now = res.timer.getNowTime();
-                            boolean isFadeout = res.timer.isTimerOn(SkinProperty.TIMER_FADEOUT);
                             boolean isIrPending = res.getState() == AbstractResult.STATE_IR_PROCESSING && now < 4500L;
                             boolean timeReached = now >= 2000L && !isIrPending;
 
