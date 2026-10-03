@@ -813,8 +813,13 @@ public class MainController {
                     AbstractResult res = (AbstractResult) this.current;
                     ScoreData score = res.getNewScore();
                     if (score != null) {
-                        int clear = score.getClear();
-                        if (clear <= 1) { // 0: NO PLAY, 1: FAILED -> do not screenshot
+                        boolean cleared = score.getClear() > ClearType.Failed.id;
+                        if (res instanceof MusicResult && res.resource.getCourseBMSModels() != null) {
+                            // Course stages normally have NO PLAY as their individual clear lamp.
+                            FloatArray gauge = res.resource.getGauge()[res.resource.getGrooveGauge().getType()];
+                            cleared = gauge.size > 0 && gauge.get(gauge.size - 1) > 0;
+                        }
+                        if (!cleared) {
                             this.autoScreenshotState = this.current;
                         } else {
                             long now = res.timer.getNowTime();
