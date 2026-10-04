@@ -231,28 +231,17 @@ public class KeyConfiguration extends MainState {
 				}
 			}
 
+			// presets only reset their own device so the other devices keep their bindings
 			if (input.isControlKeyPressed(ControlKeys.NUM7)) {
 				keyboardConfig.setKeyAssign(MODE_HINT[mode], true);
 				keyboardConfig.getMouseScratchConfig().setKeyAssign(MODE_HINT[mode]);
-				for (int i = 0; i < controllerConfigs.length; i++) {
-					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, false);
-				}
-				midiconfig.setKeyAssign(MODE_HINT[mode], false);
 			}
 			if (input.isControlKeyPressed(ControlKeys.NUM8)) {
-				keyboardConfig.setKeyAssign(MODE_HINT[mode], false);
-				keyboardConfig.getMouseScratchConfig().setKeyAssign(MODE_HINT[mode]);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, true);
 				}
-				midiconfig.setKeyAssign(MODE_HINT[mode], false);
 			}
 			if (input.isControlKeyPressed(ControlKeys.NUM9)) {
-				keyboardConfig.setKeyAssign(MODE_HINT[mode], false);
-				keyboardConfig.getMouseScratchConfig().setKeyAssign(MODE_HINT[mode]);
-				for (int i = 0; i < controllerConfigs.length; i++) {
-					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, false);
-				}
 				midiconfig.setKeyAssign(MODE_HINT[mode], true);
 			}
 
@@ -420,7 +409,7 @@ public class KeyConfiguration extends MainState {
 		if (keyboard.isReservedKey(keyboard.getLastPressedKey())) {
 			return;
 		}
-		resetKeyAssign(index);
+		resetKeyboardKeyAssign(index);
 		if (index >= 0) {
 			keyboardConfig.getKeyAssign()[index] = keyboard.getLastPressedKey();
 		} else if (index == -1) {
@@ -447,7 +436,7 @@ public class KeyConfiguration extends MainState {
 	}
 
 	private void setMouseScratchKeyAssign(int index, KeyBoardInputProcesseor kbp) {
-		resetKeyAssign(index);
+		resetKeyboardKeyAssign(index);
 		int lastMouseScratch = kbp.getMouseScratchInput().getLastMouseScratch();
 		if (index >= 0) {
 			keyboardConfig.getMouseScratchConfig().getKeyAssign()[index] = lastMouseScratch;
@@ -481,7 +470,6 @@ public class KeyConfiguration extends MainState {
 			return;
 		}
 
-		resetKeyAssign(index);
 		if (index >= 0) {
 			controllerConfigs[cindex].getKeyAssign()[index] = bmc.getLastPressedButton();
 		} else if (index == -1) {
@@ -502,14 +490,11 @@ public class KeyConfiguration extends MainState {
 		return new MidiConfig.Input();
 	}
 
-	private void resetKeyAssign(int index) {
+	// keyboard key and mouse scratch share the keyboard config, so one replaces the other
+	private void resetKeyboardKeyAssign(int index) {
 		if (index >= 0) {
 			keyboardConfig.getKeyAssign()[index] = -1;
-			for (ControllerConfig cc : controllerConfigs) {
-				cc.getKeyAssign()[index] = -1;
-			}
 			keyboardConfig.getMouseScratchConfig().getKeyAssign()[index] = -1;
-			midiconfig.setKeyAssign(index, null);
 		}
 	}
 
@@ -538,7 +523,6 @@ public class KeyConfiguration extends MainState {
 	}
 
 	private void setMidiKeyAssign(int index) {
-		resetKeyAssign(index);
 		if (index >= 0) {
 			midiconfig.setKeyAssign(index, midiinput.getLastPressedKey());
 		} else if (index == -1) {

@@ -139,28 +139,7 @@ public class PlayModeConfig {
             midi.keys = Arrays.copyOf(midi.keys, keys);
         }
 
-        // KB, コントローラー, Midiの各ボタンについて排他的処理を実施
-        boolean[] exclusive = new boolean[keyboard.keys.length];
-        validate0(keyboard.keys,  exclusive);
-        for(int i = 0;i < controller.length;i++) {
-            validate0(controller[i].keys,  exclusive);
-        }
-
-        for(int i = 0;i < midi.getKeys().length;i++) {
-            if(exclusive[i]) {
-                midi.getKeys()[i] = null;
-            }
-        }
-    }
-
-    private void validate0(int[] keys, boolean[] exclusive) {
-        for(int i = 0;i < exclusive.length;i++) {
-            if(exclusive[i]) {
-                keys[i] = -1;
-            } else if(keys[i] != -1){
-                exclusive[i] = true;
-            }
-        }
+        // No cross-device exclusivity here: keyboard, controller and MIDI each keep their own bindings.
     }
 
     public PlayConfig getPlayconfig() {

@@ -185,6 +185,8 @@ public class BMSPlayerInputProcessor extends ControllerAdapter {
 	private boolean selectPressed;
 
 	private Type type = Type.KEYBOARD;
+	// lane presses per device type since the last setPlayConfig, used to tell which device was actually played
+	private final int[] devicePressCount = new int[Type.values().length];
 
 	public void setKeyboardConfig(KeyboardConfig config) {
 		kbinput.setConfig(config);
@@ -306,34 +308,27 @@ public class BMSPlayerInputProcessor extends ControllerAdapter {
 	}
 
 	public void setPlayConfig(PlayModeConfig playconfig) {
-		// KB, コントローラー, Midiの各ボタンについて排他的処理を実施
+		// Keyboard, controller and MIDI bindings are all kept active so each device keeps its own key config.
+		// (Upstream made lanes exclusive per device and wrote -1 back into the saved config, wiping the others.)
 		int[] kbkeys = playconfig.getKeyboardConfig().getKeyAssign();
-		boolean[] exclusive = new boolean[kbkeys.length];
 		for(int i = kbkeys.length;i < keystate.length;i++) {
 			keystate[i] = false;
 			time[i] = Long.MIN_VALUE;
 		}
-		
-		int kbcount = setPlayConfig0(kbkeys,  exclusive);
-		
-		int[][] cokeys = new int[playconfig.getController().length][];
+		Arrays.fill(devicePressCount, 0);
+
+		int kbcount = countAssigned(kbkeys);
 		int cocount = 0;
-		for(int i = 0;i < cokeys.length;i++) {
-			cokeys[i] = playconfig.getController()[i].getKeyAssign();
-			cocount += setPlayConfig0(cokeys[i],  exclusive);
+		for (ControllerConfig cc : playconfig.getController()) {
+			cocount = Math.max(cocount, countAssigned(cc.getKeyAssign()));
 		}
-				
-		MidiConfig.Input[] mikeys  = playconfig.getMidiConfig().getKeys();
 		int micount = 0;
-		for(int i = 0;i < mikeys.length;i++) {
-			if(exclusive[i]) {
-				mikeys[i] = null;
-			} else {
-				exclusive[i] = true;
+		for (MidiConfig.Input in : playconfig.getMidiConfig().getKeys()) {
+			if (in != null) {
 				micount++;
 			}
 		}
-		
+
 		// 各デバイスにキーコンフィグをセット
 		kbinput.setConfig(playconfig.getKeyboardConfig());
 		setControllerConfig(playconfig.getController());
@@ -349,16 +344,20 @@ public class BMSPlayerInputProcessor extends ControllerAdapter {
 	}
 	
 	public BMSPlayerInputDevice.Type getDeviceType() {
-		return type;
+		// prefer the device that was actually used; fall back to the one with the most bindings
+		int best = -1;
+		for (int i = 0; i < devicePressCount.length; i++) {
+			if (devicePressCount[i] > 0 && (best < 0 || devicePressCount[i] > devicePressCount[best])) {
+				best = i;
+			}
+		}
+		return best >= 0 ? Type.values()[best] : type;
 	}
-	
-	private int setPlayConfig0(int[] keys, boolean[] exclusive) {
+
+	private static int countAssigned(int[] keys) {
 		int count = 0;
-		for(int i = 0;i < keys.length;i++) {
-			if(exclusive[i]) {
-				keys[i] = -1;
-			} else if(keys[i] != -1){
-				exclusive[i] = true;
+		for (int key : keys) {
+			if (key != -1) {
 				count++;
 			}
 		}
@@ -397,6 +396,9 @@ public class BMSPlayerInputProcessor extends ControllerAdapter {
 			keystate[i] = pressed;
 			time[i] = presstime;
 			lastKeyDevice = device;
+			if (pressed) {
+				devicePressCount[device.type.ordinal()]++;
+			}
 			if (starttime != 0) {
 				keylog.add(presstime - microMarginTime, i, pressed);
 			}
