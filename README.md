@@ -7,17 +7,16 @@
 
 </div>
 
-## 🌟 Fork Features (`birowsi`)
-* **Auto-Screenshot on Clear**: Automatically captures successful result screens after 2.0 seconds, waiting up to 4.5 seconds for IR ranking data when necessary. Failed plays are ignored.
-* **IR Result Reliability**: Keeps each result's uploads separate from the retry queue, prevents concurrent queue modification, and displays rankings when the primary IR lookup succeeds even if another provider fails.
-* **Runtime Logging**: Routes SLF4J messages to Java's console/file logger so IR login, upload, and ranking failures remain diagnosable.
-* **Top-Right Toast Notifications**: Anchors in-game toast notifications (`ImGuiNotify`) strictly to the top-right (`Top-Right`) using `ImGuiCond.Always`.
-* **Konmai Downloader Fix**: Configures JSON deserialization to ignore unknown fields, fixing song downloads via the Konmai API.
-* **Minor Fixes**:
-  * Fixes `ClassCastException` in `DifficultyTableParser` when score rate or miss rate are parsed as integers.
-
-> [!NOTE]
-> IR providers are installed as separate plugin JARs. This fork does not bundle an IR implementation or spoof BMS-IR's client hash. BMS-IR may reject custom builds that are not on its server-side allowlist.
+## Changes in this fork
+* Auto screenshot on clear (songs and course stages), skipped for autoplay/replay
+* Keyboard and controller keep separate key bindings, no rebinding when switching
+* Failed IR uploads are retried in the background, courses included
+* IR result shows FAIL when the upload to the ranking IR fails
+* Fixed a crash on exit (PortAudio)
+* Fixed BGA playback (FFmpeg)
+* Fixed Konmai downloader
+* Toasts in the top right
+* SLF4J logs go to `beatoraja_log.xml`
 
 ---
 
