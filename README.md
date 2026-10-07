@@ -8,8 +8,8 @@
 </div>
 
 ## Changes in this fork
+* Keyboard and controller bindings are saved separately and both work at the same time, no rebinding when switching
 * Auto screenshot on clear (songs and course stages), skipped for autoplay/replay
-* Keyboard and controller keep separate key bindings, no rebinding when switching
 * Failed IR uploads are retried in the background, courses included
 * IR result shows FAIL when the upload to the ranking IR fails
 * Fixed a crash on exit (PortAudio)
